@@ -1,12 +1,26 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\DB; 
+
 
 Route::get('/', function () {
-    // ดึงข้อมูลห้องประชุมทั้งหมด
+    // ดึงข้อมูลจากฐานข้อมูล
     $rooms = DB::table('meeting_rooms')->get();
     
-    // ส่งข้อมูลไปที่ไฟล์ resources/views/welcome.blade.php
-    return view('welcome', compact('rooms')); 
+    // ส่งตัวแปร $rooms ไปให้หน้า welcome
+    return view('welcome', compact('rooms'));
+})->middleware(['auth']); // <-- ล็อคกุญแจไว้ตรงนี้
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+require __DIR__.'/auth.php';
